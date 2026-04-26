@@ -7,8 +7,6 @@ tags: ["RAG", "Reflection", "Paper Reading"]
 draft: false
 ---
 
-# 构建一个论文辅助阅读智能体：从 RAG 到 Reflection
-
 这篇文章记录我对论文辅助阅读智能体的设计思考。
 
 ## 为什么需要 RAG？
