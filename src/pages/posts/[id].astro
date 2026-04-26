@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from "astro:content";
+import "../../styles/global.css";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+
+  return posts
+    .filter((post) => !post.data.draft)
+    .map((entry) => ({
+      params: { id: entry.id },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{entry.data.title}</title>
+    <meta name="description" content={entry.data.description} />
+  </head>
+
+  <body>
+    <main class="article-page">
+      <a class="back-link" href="/">← 返回首页</a>
+
+      <article class="article">
+        <div class="post-meta">
+          <span class="category-pill">{entry.data.category}</span>
+          <span>·</span>
+          <time datetime={entry.data.date.toISOString()}>
+            {entry.data.date.toLocaleDateString("zh-CN")}
+          </time>
+        </div>
+
+        <h1>{entry.data.title}</h1>
+        <p class="article-description">{entry.data.description}</p>
+
+        <div class="tag-row">
+          {entry.data.tags.map((tag) => <span>#{tag}</span>)}
+        </div>
+
+        <hr />
+
+        <div class="prose">
+          <Content />
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

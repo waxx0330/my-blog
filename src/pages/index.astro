@@ -1,17 +1,159 @@
 ---
+import { getCollection } from "astro:content";
+import "../styles/global.css";
 
+const allPosts = await getCollection("posts");
+const posts = allPosts
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const categories = [...new Set(posts.map((post) => post.data.category))];
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+
+const archives = posts.reduce((acc, post) => {
+  const year = post.data.date.getFullYear().toString();
+  acc[year] = (acc[year] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+const profile = {
+  name: "月怀怀",
+  title: "AI / 推荐系统 / 大模型学习者",
+  bio: "关注推荐系统、LLM Agent、大模型训练与推理工程。这里记录我的论文阅读、工程实践、课程笔记和学习路线。",
+  location: "Tokyo / Wuhan",
+};
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{profile.name} | Personal Homepage</title>
+    <meta name="description" content={profile.bio} />
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="layout">
+        <aside class="sidebar">
+          <div>
+            <div class="avatar">怀</div>
+            <h1>{profile.name}</h1>
+            <p class="profile-title">{profile.title}</p>
+            <p class="profile-bio">{profile.bio}</p>
+            <p class="location">📍 {profile.location}</p>
+            <p class="motto">✦ Never stop learning.</p>
+
+            <nav class="nav-list">
+              <a href="/">Home</a>
+              <a href="#posts">Posts</a>
+              <a href="#categories">Categories</a>
+              <a href="#tags">Tags</a>
+              <a href="mailto:your@email.com">Email</a>
+            </nav>
+          </div>
+
+          <div class="sidebar-bottom">
+            <a href="#" class="social-link">GitHub</a>
+            <a href="#" class="social-link">Scholar</a>
+          </div>
+        </aside>
+
+        <main class="main">
+          <div class="content-grid">
+            <section>
+              <section class="hero">
+                <div class="hero-label">Learning Notes & Research Blog</div>
+                <h2>记录 AI 学习、论文阅读与工程实践。</h2>
+
+                <div class="feature-grid">
+                  <div>
+                    <b>工程实践</b>
+                    <span>vLLM / Web / Deployment</span>
+                  </div>
+                  <div>
+                    <b>论文笔记</b>
+                    <span>LLM / MLLM / RecSys</span>
+                  </div>
+                  <div>
+                    <b>智能体</b>
+                    <span>Prompt / Tools / Reflection</span>
+                  </div>
+                </div>
+              </section>
+
+              <section id="posts" class="section-block">
+                <div class="section-head">
+                  <h3>Latest Posts</h3>
+                  <span>{posts.length} posts</span>
+                </div>
+
+                <div class="post-list">
+                  {
+                    posts.map((post) => (
+                      <article class="post-card">
+                        <div class="post-meta">
+                          <span class="category-pill">{post.data.category}</span>
+                          <span>·</span>
+                          <time datetime={post.data.date.toISOString()}>
+                            {post.data.date.toLocaleDateString("zh-CN")}
+                          </time>
+                        </div>
+
+                        <h2>
+                          <a href={`/posts/${post.id}/`}>
+                            {post.data.title}
+                          </a>
+                        </h2>
+
+                        <p>{post.data.description}</p>
+
+                        <div class="tag-row">
+                          {post.data.tags.map((tag) => (
+                            <span>#{tag}</span>
+                          ))}
+                        </div>
+                      </article>
+                    ))
+                  }
+                </div>
+              </section>
+            </section>
+
+            <aside class="right-rail">
+              <section class="mini-card">
+                <h3>Archives</h3>
+                <div class="archive-list">
+                  {
+                    Object.entries(archives)
+                      .sort(([a], [b]) => Number(b) - Number(a))
+                      .map(([year, count]) => (
+                        <a href="#">
+                          <span>{year}</span>
+                          <span>{count}</span>
+                        </a>
+                      ))
+                  }
+                </div>
+              </section>
+
+              <section id="categories" class="mini-card">
+                <h3>Categories</h3>
+                <div class="chip-list">
+                  {categories.map((category) => <a href="#">{category}</a>)}
+                </div>
+              </section>
+
+              <section id="tags" class="mini-card">
+                <h3>Tags</h3>
+                <div class="tag-cloud">
+                  {tags.map((tag) => <a href="#">{tag}</a>)}
+                </div>
+              </section>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
 </html>
